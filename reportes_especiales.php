@@ -24,7 +24,7 @@
             <div class="form-group row">
                 <label for="peso_producto" class="col-sm-2 col-form-label">Peso</label>
                 <div class="col-sm-3 input-group">
-                    <input type="number" class="form-control" id="peso_producto" name="peso_producto" required="required" value="<?php echo $_REQUEST['peso_producto'] ?>">
+                    <input type="number" class="form-control" id="peso_producto" step="any" name="peso_producto" required="required" value="<?php echo $_REQUEST['peso_producto'] ?>">
                     <div class="input-group-addon">
                         <select class="form-control" id="um_producto" name="um_producto" required="required" title="Unidad de medida">
                             <option <?php echo $_REQUEST['um_producto'] == 'Gr' ? "selected" : "" ?> value="Gr">Gr</option>
