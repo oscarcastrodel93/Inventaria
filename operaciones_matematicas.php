@@ -16,13 +16,13 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="valor1" class="col-sm-2 col-form-label">Valor 2</label>
+                <label for="valor2" class="col-sm-2 col-form-label">Valor 2</label>
                 <div class="col-sm-3">
                     <input type="number" class="form-control" id="valor2" name="valor2" required="required" value="<?php echo $_REQUEST['valor2'] ?>">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="valor1" class="col-sm-2 col-form-label">Operación</label>
+                <label for="operacion" class="col-sm-2 col-form-label">Operación</label>
                 <div class="col-sm-3">
                     <select class="form-control" id="operacion" name="operacion" required="required">
                         <option value=""></option>
