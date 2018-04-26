@@ -9,37 +9,43 @@
 
 		public $bd = false;
 		public $num_grupo = 18; // Numero del grupo
+		public $mensaje = "";
 		
 		protected $nombre_bd;
 		protected $nombre_tabla;
 		protected $error_conexion_mysql = "No se ha realizado conexión con el motor de base de datos";
 
 		/**
-		 * Realizar la conexion al motor de base de datos
-		 * @param string $servidor [direccion del servidor de base de datos]
-		 * @param string $usuario  [usuario de la base de datos]
-		 * @param string $clave    [contraseña de la base de datos]
+		 * Realizar la conexion al motor de base de datos tomando los datos previamente configurados
 		 */
-		function __construct($servidor, $usuario, $clave){
+		function __construct(){
+			require_once('config.php');
+			$servidor = $config['bd_config']['servidor'];
+			$usuario = $config['bd_config']['usuario'];
+			$clave = $config['bd_config']['clave'];
+
 			$this->nombre_bd = 'bdunad'.$this->num_grupo;
 			$this->nombre_tabla = 'tabla'.$this->num_grupo;
 
 			$this->bd = new mysqli($servidor, $usuario, $clave);
-			if ($this->bd->connect_errno) {
-			    echo "Fallo al conectar a MySQL: (" . $this->bd->connect_errno . ")<br>" . $this->bd->connect_error;
-			    return $this->bd = false;
+			if ($this->bd->connect_error) {
+			    echo "Fallo al conectar a MySQL: " . $this->bd->connect_error; die;
+			    // return $this->bd = false;
 		    }
 		}
 		
 		/**
 		 * Realizar conexion con la base de datos especifica
+		 * @param [bool] [Para saber si se muestra o no el error de conexion]
 		 * @return [objeto] [Instancia de MySQL]
 		 */
-		function conectar(){
+		function conectar($mostrar_error=true){
 			if (!$this->bd) return $this->error_conexion_mysql;
 			$this->bd->select_db($this->nombre_bd);
-			if ($this->bd->connect_errno) {
-			    echo "Fallo al conectar a la base de datos: (" . $this->bd->connect_errno . ")<br>" . $this->bd->connect_error;
+			if ($this->bd->error) {
+				if ($mostrar_error) {
+			    	$this->mensaje = "Fallo al conectar a la base de datos: " . $this->bd->error;
+				}
 			    return false;
 		    }
 		    else{
@@ -56,11 +62,11 @@
 
 			$query = "CREATE DATABASE IF NOT EXISTS $this->nombre_bd";
 			if ($this->bd->query($query)) {
-				echo "Base de datos creada!";
+				$this->mensaje = "Base de datos creada!";
 				return true;
 			}
 			else{
-				echo "Error al crear la base de datos. ". $this->bd->error;
+				$this->mensaje = "Error al crear la base de datos: ". $this->bd->error;
 				return false;
 			}
 		}
@@ -84,31 +90,85 @@
 						caracteristicas_producto TEXT
 					)";
 			if ($this->bd->query($query)) {
-				echo "Tabla creada!";
+				$this->mensaje = "Tabla creada!";
 				return true;
 			}
 			else{
-				echo "Error al crear la tabla. ". $this->bd->error;
+				$this->mensaje = "Error al crear la tabla: ". $this->bd->error;
 				return false;
 			}
-			
 		}
 
 		/**
-		 * Elimina la base de datos y la crea de nuevo con la respectiva tabla
+		 * Verificar si la tabla ya ha sido creada
 		 * @return [bool]
 		 */
-		function resetear(){
+		function verificar_tabla(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			$query="SHOW TABLES LIKE '$this->nombre_tabla'";
+			$resul = $this->bd->query($query);
+			return $resul->num_rows > 0 ? true : false;
+		}
+
+		/**
+		 * Eliminación de la base de datos
+		 * @return [bool]
+		 */
+		function borrar_bd(){
 			if (!$this->bd) return $this->error_conexion_mysql;
 
 			$query = "DROP DATABASE IF EXISTS $this->nombre_bd";
 			if ($this->bd->query($query)) {
-				$this->crear_bd();
-				$this->crear_tabla();
+				$this->mensaje = "Base de datos eliminada!";
 				return true;
 			}
 			else{
-				echo "Error al eliminar la base de datos. ". $this->bd->error;
+				$this->mensaje = "Error al eliminar la base de datos: ". $this->bd->error;
+				return false;
+			}
+		}
+
+		/**
+		 * Eliminación de la tabla de la base de datos
+		 * @return [bool]
+		 */
+		function borrar_tabla(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+
+			$query="DROP TABLE IF EXISTS $this->nombre_tabla";
+			if ($this->bd->query($query)) {
+				$this->mensaje = "Tabla eliminada!";
+				return true;
+			}
+			else{
+				$this->mensaje = "Error al eliminar la tabla: ". $this->bd->error;
+				return false;
+			}
+		}
+
+		/**
+		 * Eliminación de un producto por medio de su codigo
+		 * @return [bool]
+		 */
+		function borrar_producto($codigo){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se busca si el producto existe
+			$query="SELECT * FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
+			$resul = $this->bd->query($query);
+			// Si existe se elimina, por el contrario se muestra el mensaje de error
+			if ($resul->num_rows > 0) { 
+				$query="DELETE FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
+				if ($this->bd->query($query)) {
+					$this->mensaje = "Producto '$codigo' eliminado!";
+					return true;
+				}
+				else{
+					$this->mensaje = "Error al eliminar el producto: ". $this->bd->error;
+					return false;
+				}
+			}
+			else{
+				$this->mensaje = "El producto '$codigo' no existe";
 				return false;
 			}
 		}
