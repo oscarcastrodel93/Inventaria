@@ -173,5 +173,46 @@
 			}
 		}
 
+		/**
+		 * Creacion de un producto a partir del formulario de ingreso de productos
+		 * @return [bool]
+		 */
+		function crear_producto($datos){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se verifica que no haya otro producto con el mismo codigo
+			$query="SELECT * FROM $this->nombre_tabla WHERE codigo_producto = '$datos[codigo_producto]'";
+			$resul = $this->bd->query($query);
+			// Si el producto NO existe, se ingresa
+			if (!$resul->num_rows) { 
+				$query="INSERT INTO $this->nombre_tabla (codigo_producto
+							, nombre_producto
+							, peso_producto
+							, um_producto
+							, marca_producto
+							, fabricante_producto
+							, caracteristicas_producto) 
+						VALUES ($datos[codigo_producto]
+							, '$datos[nombre_producto]'
+							, $datos[peso_producto]
+							, '$datos[um_producto]'
+							, '$datos[marca_producto]'
+							, '$datos[fabricante_producto]'
+							, '$datos[caracteristicas_producto]'
+						)";
+				if ($this->bd->query($query)) {
+					$this->mensaje = "Producto '$datos[codigo_producto]' ingresado!";
+					return true;
+				}
+				else{
+					$this->mensaje = "Error al ingresar el producto: ". $this->bd->error;
+					return false;
+				}
+			}
+			else{
+				$this->mensaje = "Ya existe un producto con el codigo ingresado ($datos[codigo_producto])";
+				return false;
+			}
+		}
+
 	}
 ?>
