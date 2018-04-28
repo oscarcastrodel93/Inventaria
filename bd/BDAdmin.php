@@ -7,6 +7,10 @@
 
 	class BDAdmin{
 
+		private $servidor;
+		private $usuario;
+		private $clave;
+
 		public $bd = false;
 		public $num_grupo = 18; // Numero del grupo
 		public $mensaje = "";
@@ -20,14 +24,14 @@
 		 */
 		function __construct(){
 			require_once('config.php');
-			$servidor = $config['bd_config']['servidor'];
-			$usuario = $config['bd_config']['usuario'];
-			$clave = $config['bd_config']['clave'];
+			$this->servidor = $config['bd_config']['servidor'];
+			$this->usuario = $config['bd_config']['usuario'];
+			$this->clave = $config['bd_config']['clave'];
 
 			$this->nombre_bd = 'bdunad'.$this->num_grupo;
 			$this->nombre_tabla = 'tabla'.$this->num_grupo;
 
-			$this->bd = new mysqli($servidor, $usuario, $clave);
+			$this->bd = new mysqli($this->servidor, $this->usuario, $this->clave);
 			if ($this->bd->connect_error) {
 			    echo "Fallo al conectar a MySQL: " . $this->bd->connect_error; die;
 			    // return $this->bd = false;
@@ -147,33 +151,6 @@
 		}
 
 		/**
-		 * Eliminación de un producto por medio de su codigo
-		 * @return [bool]
-		 */
-		function borrar_producto($codigo){
-			if (!$this->bd) return $this->error_conexion_mysql;
-			// Se busca si el producto existe
-			$query="SELECT * FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
-			$resul = $this->bd->query($query);
-			// Si existe se elimina, por el contrario se muestra el mensaje de error
-			if ($resul->num_rows > 0) { 
-				$query="DELETE FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
-				if ($this->bd->query($query)) {
-					$this->mensaje = "Producto '$codigo' eliminado!";
-					return true;
-				}
-				else{
-					$this->mensaje = "Error al eliminar el producto: ". $this->bd->error;
-					return false;
-				}
-			}
-			else{
-				$this->mensaje = "El producto '$codigo' no existe";
-				return false;
-			}
-		}
-
-		/**
 		 * Creacion de un producto a partir del formulario de ingreso de productos
 		 * @return [bool]
 		 */
@@ -212,6 +189,55 @@
 				$this->mensaje = "Ya existe un producto con el codigo ingresado ($datos[codigo_producto])";
 				return false;
 			}
+		}
+
+		/**
+		 * Eliminación de un producto por medio de su codigo
+		 * @return [bool]
+		 */
+		function borrar_producto($codigo){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se busca si el producto existe
+			$query="SELECT * FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
+			$resul = $this->bd->query($query);
+			// Si existe se elimina, por el contrario se muestra el mensaje de error
+			if ($resul->num_rows > 0) { 
+				$query="DELETE FROM $this->nombre_tabla WHERE codigo_producto = '$codigo'";
+				if ($this->bd->query($query)) {
+					$this->mensaje = "Producto '$codigo' eliminado!";
+					return true;
+				}
+				else{
+					$this->mensaje = "Error al eliminar el producto: ". $this->bd->error;
+					return false;
+				}
+			}
+			else{
+				$this->mensaje = "El producto '$codigo' no existe";
+				return false;
+			}
+		}
+
+		/**
+		 * Consulta de productos por medio de su codigo
+		 * @return [bool]
+		 */
+		function consultar_productos($codigo){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se buscan productos por el codigo
+			$query = "SELECT * FROM $this->nombre_tabla WHERE codigo_producto LIKE '$codigo'";
+			$resul = $this->bd->query($query);
+			$data = array();
+			if ($resul->num_rows > 0) { 
+				while ($row = $resul->fetch_assoc()) {
+					$data[] = $row;
+				}
+				$this->mensaje = "";
+			}
+			else{
+				$this->mensaje = "Sin resultados";
+			}
+			return $data;
 		}
 
 	}

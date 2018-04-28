@@ -5,6 +5,7 @@
     require_once('bd/BDAdmin.php');
     $bd_admin = new BDAdmin();
     $bd_admin->conectar();
+    $tipo = "info";
     if (isset($_REQUEST['codigo_producto'])) {
         if ($bd_admin->crear_producto($_REQUEST)) {
             $tipo = "success";
