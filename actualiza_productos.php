@@ -2,6 +2,30 @@
 <html lang="es">
 <?php
     include("header.html");
+    require_once('bd/BDAdmin.php');
+    $bd_admin = new BDAdmin();
+    $producto = array();
+    $tipo = "info";
+    if ($bd_admin->conectar()) {
+        switch ($_REQUEST['accion']) {
+            case 'buscar_producto':
+                $producto = $bd_admin->consultar_productos($_REQUEST['codigo_producto'], true);
+                if (count($producto)) {
+                    foreach ($producto as $campo => $valor) {
+                        $_REQUEST[$campo] = $valor;
+                    }
+                }
+                break;
+            case 'actualizar_producto':
+                if ($bd_admin->actualizar_producto($_REQUEST)) {
+                    $tipo = "success";
+                }
+                else{
+                    $tipo = "warning";
+                }
+                break;
+        }
+    }
 ?>
 <body> 
     <div class="container container-fluid py-md-4">
@@ -9,11 +33,19 @@
         <hr>
         <form method="POST" action="#">
             <div class="form-group row">
-                <label for="codigo_producto" class="col-sm-2 col-form-label">Código</label>
+                <label for="codigo_producto" class="col-sm-2 col-form-label"><strong>Código</strong></label>
                 <div class="col-sm-3">
                     <input type="number" class="form-control" id="codigo_producto" name="codigo_producto" required="required" value="<?php echo $_REQUEST['codigo_producto'] ?>">
                 </div>
+                <div class="col-sm-3">
+                    <button type="submit" class="btn btn-default">Buscar</button>
+                    <input type="hidden" name="accion" value="buscar_producto">
+                </div>
             </div>
+        </form>
+        <hr>
+        <?php if( count($producto) ): ?>
+        <form method="POST" action="#">
             <div class="form-group row">
                 <label for="nombre_producto" class="col-sm-2 col-form-label">Nombre</label>
                 <div class="col-sm-3">
@@ -54,9 +86,19 @@
             <div class="form-group row">
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <input type="hidden" name="accion" value="actualizar_producto">
+                    <input type="hidden" name="codigo_producto" value="<?php echo $_REQUEST['codigo_producto'] ?>">
                 </div>
             </div>
         </form>
+    <?php endif; ?>
+    </div>
+    <div class="container container-fluid py-md-4">
+    <?php
+        if ($bd_admin->mensaje!="") {
+            echo '<div class="alert alert-'.$tipo.'" role="alert">'.$bd_admin->mensaje.'</div>';
+        }
+    ?>
     </div>
 </body>
 </html>

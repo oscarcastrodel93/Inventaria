@@ -1,10 +1,12 @@
 <?php
 
+	// Setear la zona horaria para evitar error al usar el metodo date
+	date_default_timezone_set('America/Bogota');
+
 	/**
 	* Clase para el control de procesos con la base de datos
 	* @author Oscar Castro
 	*/
-
 	class BDAdmin{
 
 		private $servidor;
@@ -150,8 +152,13 @@
 			}
 		}
 
+		###################################
+		## Operaciones con los productos ##
+		###################################
+
 		/**
 		 * Creacion de un producto a partir del formulario de ingreso de productos
+		 * @param  [array] $datos [conjunto de datos del producto]
 		 * @return [bool]
 		 */
 		function crear_producto($datos){
@@ -193,6 +200,7 @@
 
 		/**
 		 * Eliminación de un producto por medio de su codigo
+		 * @param  [string] $codigo [codigo del producto a eliminar]
 		 * @return [bool]
 		 */
 		function borrar_producto($codigo){
@@ -220,9 +228,11 @@
 
 		/**
 		 * Consulta de productos por medio de su codigo
-		 * @return [bool]
+		 * @param  [string] $codigo [codigo del producto a buscar]
+		 * @param  [bool] $unico  [si solo debe retornar un producto]
+		 * @return [array]        [listado de productos]
 		 */
-		function consultar_productos($codigo){
+		function consultar_productos($codigo, $unico=false){
 			if (!$this->bd) return $this->error_conexion_mysql;
 			// Se buscan productos por el codigo
 			$query = "SELECT * FROM $this->nombre_tabla WHERE codigo_producto LIKE '$codigo'";
@@ -233,11 +243,50 @@
 					$data[] = $row;
 				}
 				$this->mensaje = "";
+				// Si solo se debe retornar un producto
+				if ($unico) {
+					$data = $data[0];
+				}
 			}
 			else{
 				$this->mensaje = "Sin resultados";
 			}
 			return $data;
+		}
+
+		/**
+		 * Actualiza un producto
+		 * @param  [array] $datos [conjunto de datos del producto]
+		 * @return [bool]
+		 */
+		function actualizar_producto($datos){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se verifica que haya otro producto con el codigo ingresado
+			$query="SELECT * FROM $this->nombre_tabla WHERE codigo_producto = '$datos[codigo_producto]'";
+			$resul = $this->bd->query($query);
+			// Si el producto existe, se actualiza
+			if ($resul->num_rows) { 
+				$query="UPDATE $this->nombre_tabla SET 
+							nombre_producto = '$datos[nombre_producto]'
+							, peso_producto = $datos[peso_producto]
+							, um_producto = '$datos[um_producto]'
+							, marca_producto = '$datos[marca_producto]'
+							, fabricante_producto = '$datos[fabricante_producto]'
+							, caracteristicas_producto = '$datos[caracteristicas_producto]'
+						WHERE codigo_producto = $datos[codigo_producto]";
+				if ($this->bd->query($query)) {
+					$this->mensaje = "Producto actualizado!";
+					return true;
+				}
+				else{
+					$this->mensaje = "Error al actualizar el producto: ". $this->bd->error;
+					return false;
+				}
+			}
+			else{
+				$this->mensaje = "No existe un producto con el codigo ingresado ($datos[codigo_producto])";
+				return false;
+			}
 		}
 
 	}
