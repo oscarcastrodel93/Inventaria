@@ -37,10 +37,12 @@
                 <div class="col-sm-3">
                     <input type="number" class="form-control" id="codigo_producto" name="codigo_producto" required="required" value="<?php echo $_REQUEST['codigo_producto'] ?>">
                 </div>
+                <?php if($bd_admin->conectado): ?>
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-default">Buscar</button>
                     <input type="hidden" name="accion" value="buscar_producto">
                 </div>
+            <?php endif; ?>
             </div>
         </form>
         <hr>
@@ -83,6 +85,7 @@
                     <textarea type="text" class="form-control" id="caracteristicas_producto" name="caracteristicas_producto" required="required"><?php echo $_REQUEST['caracteristicas_producto'] ?></textarea>
                 </div>
             </div>
+            <?php if($bd_admin->conectado): ?>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-primary">Actualizar</button>
@@ -90,6 +93,7 @@
                     <input type="hidden" name="codigo_producto" value="<?php echo $_REQUEST['codigo_producto'] ?>">
                 </div>
             </div>
+            <?php endif; ?>
         </form>
     <?php endif; ?>
     </div>

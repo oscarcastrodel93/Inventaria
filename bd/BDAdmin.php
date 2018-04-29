@@ -16,6 +16,7 @@
 		public $bd = false;
 		public $num_grupo = 18; // Numero del grupo
 		public $mensaje = "";
+		public $conectado = false;
 		
 		protected $nombre_bd;
 		protected $nombre_tabla;
@@ -35,8 +36,8 @@
 
 			$this->bd = new mysqli($this->servidor, $this->usuario, $this->clave);
 			if ($this->bd->connect_error) {
-			    echo "Fallo al conectar a MySQL: " . $this->bd->connect_error; die;
-			    // return $this->bd = false;
+			    echo "<h3>Fallo al conectar a MySQL: " . $this->bd->connect_error. ". Verifica que los datos de conexión en el archivo bd/config.php sean correctos.</h3>"; 
+			    die;
 		    }
 		}
 		
@@ -51,11 +52,12 @@
 			if ($this->bd->error) {
 				if ($mostrar_error) {
 			    	$this->mensaje = "Fallo al conectar a la base de datos: " . $this->bd->error;
+			    	$this->mensaje.= ". Verifica en la página <a href='administrar.php' class='alert-link'>Administrador</a> que la base de datos haya sido creada.";
 				}
-			    return false;
+			    return $this->conectado = false;
 		    }
 		    else{
-		    	return true;
+		    	return $this->conectado = true;
 		    }
 		}
 

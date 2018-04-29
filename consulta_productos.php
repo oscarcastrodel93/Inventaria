@@ -28,11 +28,13 @@
                         title="Para buscar coincidencias, utilice el comodín %. Ejemplo: %123%">
                 </div>
             </div>
+            <?php if($bd_admin->conectado): ?>
             <div class="form-group row">
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-primary">Buscar</button>
                 </div>
             </div>
+            <?php endif; ?>
         </form>
         <hr>
     </div>

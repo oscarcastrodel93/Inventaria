@@ -35,6 +35,7 @@
     <div class="container container-fluid py-md-4">
         <h1 class="bd-title" id="content">Administrar</h1>
         <hr>
+        <?php if( !$bd_admin->conectar(False) ): ?>
         <div class="row">
             <div class="col-sm-6 col-form-label">
                 <label>Crear la base de datos</label>
@@ -47,6 +48,7 @@
             </div>
         </div>
         <hr>
+        <?php endif; ?>
         <?php if( $bd_admin->conectar(False) && !$bd_admin->verificar_tabla() ): ?>
         <div class="row">
             <div class="col-sm-6 col-form-label">

@@ -61,11 +61,13 @@
                     <textarea type="text" class="form-control" id="caracteristicas_producto" name="caracteristicas_producto" required="required"><?php echo $_REQUEST['caracteristicas_producto'] ?></textarea>
                 </div>
             </div>
+            <?php if($bd_admin->conectado): ?>
             <div class="form-row">
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </div>
+            <?php endif; ?>
         </form>
 
     </div>
