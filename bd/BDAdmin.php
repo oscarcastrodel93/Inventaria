@@ -292,5 +292,21 @@
 			}
 		}
 
+		function backup_bd(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			$mysqldump = '"C:\AppServ\MySQL\bin\mysqldump.exe"';
+			$ruta_backup = "backup/".$this->nombre_bd."_".date('Y-m-d_H-i-s').".sql";
+			$cmd = "$mysqldump --no-defaults -u $this->usuario -p$this->clave $this->nombre_bd > $ruta_backup";
+			system($cmd, $output);
+			if (!$output) {
+				$this->mensaje = "Backup generado!";
+				return $ruta_backup;
+			}
+			else{
+				$this->mensaje = "Error al generar el backup!";
+				return false;
+			}
+		}
+
 	}
 ?>

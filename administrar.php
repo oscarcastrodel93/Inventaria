@@ -77,6 +77,20 @@
         </div>
         <hr>
         <?php endif; ?>
+        <?php if($bd_admin->conectar(False)): ?>
+        <div class="row">
+            <div class="col-sm-6 col-form-label">
+                <label>Generar backup</label>
+            </div>
+            <div class="col-sm-3">
+                <form method="POST" action="exportar.php">
+                    <button type="submit" class="btn btn-info">Backup BD</button>
+                    <input type="hidden" class="form-control" name="accion" value="backup_bd">
+                </form>
+            </div>
+        </div>
+        <hr>
+        <?php endif; ?>
         <?php if( $bd_admin->conectar(False) && $bd_admin->verificar_tabla() ): ?>
         <div class="row">
             <div class="col-sm-12 col-form-label">

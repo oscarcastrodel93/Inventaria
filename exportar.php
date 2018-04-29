@@ -56,5 +56,24 @@
             $pdf->WriteHTML($html);
             $pdf->Output();
             
+        case 'backup_bd':
+            require_once('bd/BDAdmin.php');
+            $bd_admin = new BDAdmin();
+            $filepath = $bd_admin->backup_bd();
+
+            if(file_exists($filepath)) {
+                header('Content-Type: application/octet-stream');
+                header('Content-Disposition: attachment; filename="'.basename($filepath).'"');
+                header("Content-Transfer-Encoding: binary");
+                header('Content-Length: ' . filesize($filepath));
+                flush(); // Flush system output buffer
+                readfile($filepath);
+                exit;
+            }
+            else{
+                echo $bd_admin->mensaje;
+            }
+            break;
+            
     }
 ?>
