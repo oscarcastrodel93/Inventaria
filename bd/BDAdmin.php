@@ -227,7 +227,7 @@
 		}
 
 		/**
-		 * Consulta de productos por medio de su codigo
+		 * Consulta de productos
 		 * @param  [string] $codigo [codigo del producto a buscar]
 		 * @param  [bool] $unico  [si solo debe retornar un producto]
 		 * @return [array]        [listado de productos]
@@ -235,7 +235,8 @@
 		function consultar_productos($codigo, $unico=false){
 			if (!$this->bd) return $this->error_conexion_mysql;
 			// Se buscan productos por el codigo
-			$query = "SELECT * FROM $this->nombre_tabla WHERE codigo_producto LIKE '$codigo'";
+			$where = $codigo ? "WHERE codigo_producto LIKE '$codigo'" : "";
+			$query = "SELECT * FROM $this->nombre_tabla $where";
 			$resul = $this->bd->query($query);
 			$data = array();
 			if ($resul->num_rows > 0) { 
@@ -245,7 +246,7 @@
 				$this->mensaje = "";
 				// Si solo se debe retornar un producto
 				if ($unico) {
-					$data = $data[0];
+					return $data[0];
 				}
 			}
 			else{
