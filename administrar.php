@@ -11,18 +11,21 @@
                 $bd_admin->conectar();
             }
             break;
+        case 'crear_tabla_usuarios':
+            if ($bd_admin->conectar()) {
+                $bd_admin->crear_tabla_usuarios();
+            }
+            break;
         case 'crear_tabla':
             if ($bd_admin->conectar()) {
                 $bd_admin->crear_tabla();
             }
             break;
-            
         case 'borrar_bd':
             if ($bd_admin->conectar()) {
                 $bd_admin->borrar_bd();
             }
             break;
-
         case 'borrar_producto':
             if ($bd_admin->conectar()) {
                 $codigo = $_REQUEST['codigo_producto'];
@@ -49,14 +52,41 @@
         </div>
         <hr>
         <?php endif; ?>
-        <?php if( $bd_admin->conectar(False) && !$bd_admin->verificar_tabla() ): ?>
+        <!-- INICIO Para los usuarios -->
+        <?php if( $bd_admin->conectar(False) && !$bd_admin->verificar_tabla('usuarios') ): ?>
         <div class="row">
             <div class="col-sm-6 col-form-label">
-                <label>Crear la tabla para la base de datos</label>
+                <label>Crear la tabla para los usuarios</label>
             </div>
             <div class="col-sm-3">
                 <form method="POST" action="#">
-                    <button type="submit" class="btn btn-primary">Crear tabla</button>
+                    <button type="submit" class="btn btn-primary">Crear tabla usuarios</button>
+                    <input type="hidden" class="form-control" name="accion" value="crear_tabla_usuarios">
+                </form>
+            </div>
+        </div>
+        <hr>
+        <?php endif; ?>
+        <?php if( $bd_admin->conectar(False) && $bd_admin->verificar_tabla('usuarios') ): ?>
+        <div class="row">
+            <div class="col-sm-6 col-form-label">
+                <label>Gestiona los usuarios del sistema</label>
+            </div>
+            <div class="col-sm-3">
+                <a class="btn btn-info" href="gestionar_usuarios.php">Gestionar</a>
+            </div>
+        </div>
+        <hr>
+        <?php endif; ?>
+        <!-- FIN Para los usuarios -->
+        <?php if( $bd_admin->conectar(False) && !$bd_admin->verificar_tabla() ): ?>
+        <div class="row">
+            <div class="col-sm-6 col-form-label">
+                <label>Crear la tabla para los productos</label>
+            </div>
+            <div class="col-sm-3">
+                <form method="POST" action="#">
+                    <button type="submit" class="btn btn-primary">Crear tabla productos</button>
                     <input type="hidden" class="form-control" name="accion" value="crear_tabla">
                 </form>
             </div>

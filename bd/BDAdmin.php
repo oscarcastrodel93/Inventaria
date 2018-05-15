@@ -111,9 +111,10 @@
 		 * Verificar si la tabla ya ha sido creada
 		 * @return [bool]
 		 */
-		function verificar_tabla(){
+		function verificar_tabla($tabla=false){
 			if (!$this->bd) return $this->error_conexion_mysql;
-			$query="SHOW TABLES LIKE '$this->nombre_tabla'";
+			$nombre_tabla = $tabla ? $tabla : $this->nombre_tabla;
+			$query="SHOW TABLES LIKE '$nombre_tabla'";
 			$resul = $this->bd->query($query);
 			return $resul->num_rows > 0 ? true : false;
 		}
@@ -132,6 +133,26 @@
 			}
 			else{
 				$this->mensaje = "Error al eliminar la base de datos: ". $this->bd->error;
+				return false;
+			}
+		}
+
+		/**
+		 * Generacion del backup de la base de datos
+		 * @return [type] [description]
+		 */
+		function backup_bd(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			$mysqldump = '"C:\AppServ\MySQL\bin\mysqldump.exe"';
+			$ruta_backup = "backup/".$this->nombre_bd."_".date('Y-m-d_H-i-s').".sql";
+			$cmd = "$mysqldump --no-defaults -u $this->usuario -p$this->clave $this->nombre_bd > $ruta_backup";
+			system($cmd, $output);
+			if (!$output) {
+				$this->mensaje = "Backup generado!";
+				return $ruta_backup;
+			}
+			else{
+				$this->mensaje = "Error al generar el backup!";
 				return false;
 			}
 		}
@@ -292,20 +313,99 @@
 			}
 		}
 
-		function backup_bd(){
+		##################################
+		## Operaciones con los usuarios ##
+		##################################
+		
+		/**
+		 * Creacion de la tabla de usuarios
+		 * // Incluye la creacion del usuario admin
+		 * @return [bool]
+		 */
+		function crear_tabla_usuarios(){
 			if (!$this->bd) return $this->error_conexion_mysql;
-			$mysqldump = '"C:\AppServ\MySQL\bin\mysqldump.exe"';
-			$ruta_backup = "backup/".$this->nombre_bd."_".date('Y-m-d_H-i-s').".sql";
-			$cmd = "$mysqldump --no-defaults -u $this->usuario -p$this->clave $this->nombre_bd > $ruta_backup";
-			system($cmd, $output);
-			if (!$output) {
-				$this->mensaje = "Backup generado!";
-				return $ruta_backup;
+
+			$query="CREATE TABLE usuarios (
+						id INT(6) AUTO_INCREMENT PRIMARY KEY,
+						nombre_usuario VARCHAR(50) NOT NULL,
+						clave_usuario VARCHAR(50) NOT NULL,
+						estado_usuario INT(1) NOT NULL
+					)";
+			if ($this->bd->query($query)) {
+				$this->mensaje = "Tabla para usuarios creada! ";
+				// Se crea un usuario admin por defecto
+				$datos = array('nombre_usuario' => 'admin', 'clave_usuario' => '1234', 'estado_usuario' => 1);
+				$this->crear_usuario($datos);
+				return true;
 			}
 			else{
-				$this->mensaje = "Error al generar el backup!";
+				$this->mensaje = "Error al crear la tabla de usuarios: ". $this->bd->error;
 				return false;
 			}
+		}
+
+		/**
+		 * Creacion de usuario para el ingreso al sistema
+		 * @param  [array] $datos   [datos del usuario a crear]
+		 * @return [bool]
+		 */
+		function crear_usuario($datos){
+			// Eliminar espacios en blanco
+			$datos['nombre_usuario'] = $string = preg_replace('/\s/', '', $datos['nombre_usuario']);
+
+			// Se verifica que no haya otro usuario con el mismo nombre
+			$query="SELECT * FROM usuarios WHERE nombre_usuario = '$datos[nombre_usuario]'";
+			$resul = $this->bd->query($query);
+			// Si el usuario NO existe, se crea
+			if (!$resul->num_rows) { 
+				$query="INSERT INTO usuarios (nombre_usuario
+							, clave_usuario
+							, estado_usuario) 
+						VALUES ('$datos[nombre_usuario]'
+							, '".md5($datos['clave_usuario'])."'
+							, $datos[estado_usuario]
+						)";
+				if ($this->bd->query($query)) {
+					$this->mensaje .= "Usuario '$datos[nombre_usuario]' creado!";
+					return true;
+				}
+				else{
+					$this->mensaje = "Error al crear el usuario: ". $this->bd->error;
+					return false;
+				}
+			}
+			else{
+				$this->mensaje = "Ya existe un usuario con el nombre ingresado ($datos[nombre_usuario])";
+				return false;
+			}
+		}
+
+		/**
+		 * Consulta de usuarios
+		 * @param  [string] $nombre [nombre del usuario a buscar]
+		 * @param  [bool] $unico    [si solo debe retornar un usuario, el primero del listado]
+		 * @return [array]          [listado de productos]
+		 */
+		function consultar_usuarios($nombre, $unico=false){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Se buscan productos por el nombre
+			$where = $nombre ? "WHERE nombre_usuario LIKE '$nombre'" : "";
+			$query = "SELECT * FROM usuarios $where";
+			$resul = $this->bd->query($query);
+			$data = array();
+			if ($resul->num_rows > 0) { 
+				while ($row = $resul->fetch_assoc()) {
+					$data[] = $row;
+				}
+				// Si solo se debe retornar un producto
+				if ($unico) {
+					return $data[0];
+				}
+			}
+			else{
+				$this->mensaje = "Sin resultados";
+			}
+			return $data;
 		}
 
 	}
