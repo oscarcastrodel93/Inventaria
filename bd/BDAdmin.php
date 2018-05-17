@@ -408,5 +408,39 @@
 			return $data;
 		}
 
+		/**
+		 * Cambiar el estado del usuario
+		 * @param  [type] $usuario [nombre del usuario]
+		 * @param  [type] $estado  [nuevo estado]
+		 * @return [bool]
+		 */
+		function cambiar_estado($usuario, $estado){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			$query="UPDATE usuarios SET 
+						estado_usuario = $estado
+					WHERE nombre_usuario = '$usuario'";
+			if ($this->bd->query($query)) {
+				$this->mensaje = "Usuario actualizado!";
+				return true;
+			}
+			else{
+				$this->mensaje = "Error al actualizar el usuario: ". $this->bd->error;
+				return false;
+			}
+		}
+
+		function eliminar_usuario($usuario){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			$query="DELETE FROM usuarios WHERE nombre_usuario = '$usuario'";
+			if ($this->bd->query($query)) {
+				$this->mensaje = "Usuario eliminado!";
+				return true;
+			}
+			else{
+				$this->mensaje = "Error al eliminar el usuario: ". $this->bd->error;
+				return false;
+			}
+		}
+
 	}
 ?>

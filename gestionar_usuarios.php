@@ -9,6 +9,15 @@
         case 'crear_usuario':
             $bd_admin->crear_usuario($_REQUEST);
             break;
+        case 'Inactivar':
+            $bd_admin->cambiar_estado($_REQUEST['nombre_usuario'], 0);
+            break;
+        case 'Activar':
+            $bd_admin->cambiar_estado($_REQUEST['nombre_usuario'], 1);
+            break;
+        case 'Eliminar':
+            $bd_admin->eliminar_usuario($_REQUEST['nombre_usuario']);
+            break;
     }
 
     // Consultar los usuarios registrados
@@ -31,7 +40,7 @@
                         </div>
                         <div class="form-group col-md-3 offset-md-1">
                             <label for="clave_usuario">Contraseña</label>
-                            <input type="text" class="form-control" id="clave_usuario" name="clave_usuario" required="required" autocomplete="off">
+                            <input type="password" class="form-control" id="clave_usuario" name="clave_usuario" required="required" autocomplete="off">
                         </div>
                         <div class="form-group col-md-3 offset-md-1">
                             <label for="estado_usuario">Estado</label>
@@ -68,7 +77,7 @@
                         <tr>
                             <th>Nombre</th>
                             <th>Estado</th>
-                            <th style="width:20%;"></th>
+                            <th style="width:25%;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -76,13 +85,20 @@
                         <tr>
                             <td><?php echo $row['nombre_usuario']; ?></td>
                             <td><?php echo $row['estado_usuario'] ? 'Activo' : 'Inactivo'; ?></td>
-                            <td>
-                                <?php if($row['estado_usuario']): ?>
-                                <button type="button" class="btn btn-sm btn-warning">Inactivar</button>
+                            <td style="text-align: right;">
+                                <?php if($row['nombre_usuario']!='admin'): ?>
+                                <form action="#">
+                                    <?php if($row['estado_usuario']): ?>
+                                    <input type="submit" class="btn btn-sm btn-warning" name="accion" value="Inactivar">
+                                    <?php else: ?>
+                                    <input type="submit" class="btn btn-sm btn-success" name="accion" value="Activar">
+                                    <?php endif; ?>
+                                    <input type="submit" class="btn btn-sm btn-danger" name="accion" value="Eliminar">
+                                    <input type="hidden" name="nombre_usuario" value="<?php echo $row[nombre_usuario] ?>">
+                                </form>
                                 <?php else: ?>
-                                <button type="button" class="btn btn-sm btn-success">Activar</button>
+                                    <small style="color:gray;">El usuario admin no se puede eliminar</small>
                                 <?php endif; ?>
-                                &nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger">Eliminar</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
