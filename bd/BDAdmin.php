@@ -351,7 +351,8 @@
 		 */
 		function crear_usuario($datos){
 			// Eliminar espacios en blanco
-			$datos['nombre_usuario'] = $string = preg_replace('/\s/', '', $datos['nombre_usuario']);
+			$datos['nombre_usuario'] = preg_replace('/\s/', '', $datos['nombre_usuario']);
+			$datos['clave_usuario'] = $this->bd->real_escape_string($datos['clave_usuario']);
 
 			// Se verifica que no haya otro usuario con el mismo nombre
 			$query="SELECT * FROM usuarios WHERE nombre_usuario = '$datos[nombre_usuario]'";
@@ -410,8 +411,8 @@
 
 		/**
 		 * Cambiar el estado del usuario
-		 * @param  [type] $usuario [nombre del usuario]
-		 * @param  [type] $estado  [nuevo estado]
+		 * @param  [string] $usuario [nombre del usuario]
+		 * @param  [int]    $estado  [nuevo estado]
 		 * @return [bool]
 		 */
 		function cambiar_estado($usuario, $estado){
@@ -429,6 +430,11 @@
 			}
 		}
 
+		/**
+		 * Eliminar usuarios registrados
+		 * @param  [string] $usuario [nombre del usuario]
+		 * @return [bool]
+		 */
 		function eliminar_usuario($usuario){
 			if (!$this->bd) return $this->error_conexion_mysql;
 			$query="DELETE FROM usuarios WHERE nombre_usuario = '$usuario'";
@@ -439,6 +445,58 @@
 			else{
 				$this->mensaje = "Error al eliminar el usuario: ". $this->bd->error;
 				return false;
+			}
+		}
+
+		/**
+		 * Al ingresar a la aplicacion, se verifica que la base de datos y la tabla de usuarios exista
+		 * Si no existen, se crean
+		 */
+		function verificar_conexion(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+
+			if (!$this->conectar(False)) {
+		        if($this->crear_bd()){
+		        	$this->conectar();
+		        	$this->crear_tabla_usuarios();
+		        	$this->mensaje="";
+		        }
+		    }
+		}
+
+		/**
+		 * Creacion de la sesion para el ingreso a la aplicacion
+		 * @param  [array] $datos_login [datos del usuario que ingresa]
+		 * @return [bool]
+		 */
+		function login($datos_login){
+			if (!$this->bd) return $this->error_conexion_mysql;
+
+			$usuario = stripslashes($datos_login['nombre_usuario']);
+			$usuario = $this->bd->real_escape_string($usuario);
+			$clave = stripslashes($datos_login['clave_usuario']);
+			$clave = $this->bd->real_escape_string($clave);
+
+			$datos_usuario = $this->consultar_usuarios($usuario, true);
+			// Si el usuario existe, verifica constraseña
+			if ($datos_usuario) {
+				// Si el usuario no se encuentra activo, lanza error
+				if (!$datos_usuario['estado']) {
+					$this->mensaje = "El usuario se encuentra inactivo!";
+				}
+				// Si la contraseña coincide, se hace login
+				if (md5($clave) == $datos_usuario['clave_usuario']) {
+					session_start();
+					$_SESSION['nombre_usuario'] = $datos_usuario['nombre_usuario'];
+					$_SESSION['start'] = time();
+					$_SESSION['expire'] = $_SESSION['start'] + (600); // 600 segundos equivalentes a 10 minutos
+			        // Redirige al inicio
+				    header("Location: index.php");
+				}
+				
+			}
+			else{
+				$this->mensaje = "Datos incorrectos!";
 			}
 		}
 
