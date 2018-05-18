@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
-    include("header.html");
+    include("header.php");
 ?>
 <body> 
     <div class="container container-fluid py-md-4">

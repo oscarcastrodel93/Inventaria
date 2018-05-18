@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
-    include("header.html");
-    require_once('bd/BDAdmin.php');
-    $bd_admin = new BDAdmin();
+    include("header.php");
     $productos = array();
     if ($bd_admin->conectar() && isset($_REQUEST['codigo_producto'])) {
         $productos = $bd_admin->consultar_productos($_REQUEST['codigo_producto']);

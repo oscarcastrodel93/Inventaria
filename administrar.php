@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
-    include("header.html");
+    include("header.php");
 
-    require_once('bd/BDAdmin.php');
-    $bd_admin = new BDAdmin();
     switch ($_REQUEST['accion']) {
         case 'crear_bd':
             if ($bd_admin->crear_bd()) {
@@ -73,7 +71,7 @@
                 <label>Gestiona los usuarios del sistema</label>
             </div>
             <div class="col-sm-3">
-                <a class="btn btn-info" href="gestionar_usuarios.php">Gestionar</a>
+                <a class="btn btn-primary" href="gestionar_usuarios.php">Gestionar</a>
             </div>
         </div>
         <hr>
@@ -94,7 +92,7 @@
         <hr>
         <?php endif; ?>
         <?php if($bd_admin->conectar(False)): ?>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-sm-6 col-form-label">
                 <label>Borrar la base de datos</label>
             </div>
@@ -105,7 +103,7 @@
                 </form>
             </div>
         </div>
-        <hr>
+        <hr> -->
         <?php endif; ?>
         <?php if($bd_admin->conectar(False)): ?>
         <div class="row">

@@ -1,4 +1,8 @@
 <?php
+    require_once('bd/BDAdmin.php');
+    $bd_admin = new BDAdmin();
+    $bd_admin->auth();
+
     switch ($_REQUEST['accion']) {
         case 'reportes_especiales':
             $text = "Datos del producto.\r\n";
@@ -14,11 +18,9 @@
             break;
 
         case 'generar_pdf':
-            require_once('bd/BDAdmin.php');
-            $bd_admin = new BDAdmin();
             $bd_admin->conectar();
+            $bd_admin->auth();
             $productos = $bd_admin->consultar_productos(False);
-            
 
             $html = '<h3>Productos registrados</h3><hr>';
             foreach ($productos as $key => $row) {
@@ -55,10 +57,9 @@
             $pdf = new HTML2PDF('P','A4','es', true, 'UTF-8', array(10, 10, 10, 10));
             $pdf->WriteHTML($html);
             $pdf->Output();
+            break;
             
         case 'backup_bd':
-            require_once('bd/BDAdmin.php');
-            $bd_admin = new BDAdmin();
             $filepath = $bd_admin->backup_bd();
 
             if(file_exists($filepath)) {

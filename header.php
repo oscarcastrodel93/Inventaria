@@ -1,3 +1,10 @@
+<?php 
+    session_start();
+    require_once('bd/BDAdmin.php');
+    $bd_admin = new BDAdmin();
+    $bd_admin->verificar_conexion();
+    $bd_admin->auth();
+?>
 <header>
     <head>
         <meta charset="UTF-8">
@@ -39,8 +46,17 @@
                 </li>
             </ul>
             <ul class="navbar-nav navbar-right ml-md-auto ">
-                <li class="nav-item">
-                    <a class="nav-link" href="administrar.php">Administrador</a>
+                <li class="navbar-text">
+                    <label>Bienvenido, </label>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <?php echo $_SESSION['nombre_usuario'] ?>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="administrar.php">Administrador</a>
+                        <a class="dropdown-item" href="login.php">Cerrar sesión</a>
+                    </div>
                 </li>
             </ul>
         </div>

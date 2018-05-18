@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <?php
-    include("header.html");
-    require_once('bd/BDAdmin.php');
-    $bd_admin = new BDAdmin();
+    include("header.php");
     $producto = array();
     $tipo = "info";
     if ($bd_admin->conectar()) {

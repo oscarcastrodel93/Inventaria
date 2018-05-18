@@ -14,9 +14,10 @@
 		private $clave;
 
 		public $bd = false;
-		public $num_grupo = 18; // Numero del grupo
+		public $num_grupo = 19; // Numero del grupo
 		public $mensaje = "";
 		public $conectado = false;
+		public $tiempo_sesion = 600; // 600 segundos equivalentes a 10 minutos
 		
 		protected $nombre_bd;
 		protected $nombre_tabla;
@@ -449,7 +450,7 @@
 		}
 
 		/**
-		 * Al ingresar a la aplicacion, se verifica que la base de datos y la tabla de usuarios exista
+		 * Al ingresar a la aplicacion, se verifica que la base de datos y las tablas necesarias existan
 		 * Si no existen, se crean
 		 */
 		function verificar_conexion(){
@@ -459,8 +460,13 @@
 		        if($this->crear_bd()){
 		        	$this->conectar();
 		        	$this->crear_tabla_usuarios();
+		        	$this->crear_tabla();
 		        	$this->mensaje="";
 		        }
+		    }
+		    else if(!$this->verificar_tabla('usuarios')){
+		    	$this->crear_tabla_usuarios();
+		        $this->mensaje="";
 		    }
 		}
 
@@ -476,20 +482,21 @@
 			$usuario = $this->bd->real_escape_string($usuario);
 			$clave = stripslashes($datos_login['clave_usuario']);
 			$clave = $this->bd->real_escape_string($clave);
-
+			// Se busca el usuario por su nombre
 			$datos_usuario = $this->consultar_usuarios($usuario, true);
 			// Si el usuario existe, verifica constraseña
 			if ($datos_usuario) {
 				// Si el usuario no se encuentra activo, lanza error
-				if (!$datos_usuario['estado']) {
+				if (!$datos_usuario['estado_usuario']) {
 					$this->mensaje = "El usuario se encuentra inactivo!";
+					return false;
 				}
 				// Si la contraseña coincide, se hace login
 				if (md5($clave) == $datos_usuario['clave_usuario']) {
 					session_start();
 					$_SESSION['nombre_usuario'] = $datos_usuario['nombre_usuario'];
 					$_SESSION['start'] = time();
-					$_SESSION['expire'] = $_SESSION['start'] + (600); // 600 segundos equivalentes a 10 minutos
+					$_SESSION['expire'] = $_SESSION['start'] + ($this->tiempo_sesion);
 			        // Redirige al inicio
 				    header("Location: index.php");
 				}
@@ -497,6 +504,25 @@
 			}
 			else{
 				$this->mensaje = "Datos incorrectos!";
+			}
+		}
+
+		/**
+		 * Verifica que el usuario este logeado para ingresar a la aplicacion.
+		 * Tambien cierra la sesion si el tiempo de sesion ha terminado.
+		 * @return [type] [description]
+		 */
+		function auth(){
+			session_start();
+			if(!isset($_SESSION["nombre_usuario"])){
+				// Redirige al login
+				header("Location: login.php");
+			}
+			$now = time();
+			if($now > $_SESSION['expire']) {
+				session_destroy();
+				// Redirige al login
+				header("Location: login.php");
 			}
 		}
 

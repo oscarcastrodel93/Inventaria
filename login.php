@@ -1,4 +1,6 @@
 <?php 
+    session_start();
+    session_destroy();
     require_once('bd/BDAdmin.php');
     $bd_admin = new BDAdmin();
     $bd_admin->verificar_conexion();
@@ -26,6 +28,7 @@
                 width: 50%; margin: 0 auto;
                 border: 1px solid lightgray;
                 padding: 3%;
+                margin-top: 5%;
             }
         </style>
     </head>
@@ -53,7 +56,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-12">
+                    <div class="col-sm-12 text-center">
                         <input type="submit" class="btn btn-primary" name="accion" value="Ingresar">
                     </div>
                 </div>
