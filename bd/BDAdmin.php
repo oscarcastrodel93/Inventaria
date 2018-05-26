@@ -14,7 +14,7 @@
 		private $clave;
 
 		public $bd = false;
-		public $num_grupo = 19; // Numero del grupo
+		public $num_grupo = 18; // Numero del grupo
 		public $mensaje = "";
 		public $conectado = false;
 		public $tiempo_sesion = 600; // 600 segundos equivalentes a 10 minutos
@@ -319,6 +319,31 @@
 		##################################
 		
 		/**
+		 * Al ingresar a la aplicacion, se verifica que la base de datos y las tablas necesarias existan
+		 * Si no existen, se crean
+		 */
+		function verificar_conexion(){
+			if (!$this->bd) return $this->error_conexion_mysql;
+			// Si no logra conectarse a la base de datos, significa que no existe y crea una nueva
+			if (!$this->conectar(False)) {
+				// Si la base de datos se pudo crear ...
+		        if($this->crear_bd()){
+		        	// se conecta ...
+		        	$this->conectar();
+					// crea la tabla de usuarios...
+		        	$this->crear_tabla_usuarios();
+		        	// y la tabla de productos.
+		        	$this->crear_tabla();
+		        	$this->mensaje="";
+		        }
+		    }
+		    else if(!$this->verificar_tabla('usuarios')){ //Sino existe la tabla de usuarios, se crea
+		    	$this->crear_tabla_usuarios();
+		        $this->mensaje="";
+		    }
+		}
+
+		/**
 		 * Creacion de la tabla de usuarios
 		 * // Incluye la creacion del usuario admin
 		 * @return [bool]
@@ -335,7 +360,11 @@
 			if ($this->bd->query($query)) {
 				$this->mensaje = "Tabla para usuarios creada! ";
 				// Se crea un usuario admin por defecto
-				$datos = array('nombre_usuario' => 'admin', 'clave_usuario' => '1234', 'estado_usuario' => 1);
+				$datos = array(
+					'nombre_usuario' => 'admin', 
+					'clave_usuario' => '1234', 
+					'estado_usuario' => 1
+				);
 				$this->crear_usuario($datos);
 				return true;
 			}
@@ -450,34 +479,13 @@
 		}
 
 		/**
-		 * Al ingresar a la aplicacion, se verifica que la base de datos y las tablas necesarias existan
-		 * Si no existen, se crean
-		 */
-		function verificar_conexion(){
-			if (!$this->bd) return $this->error_conexion_mysql;
-
-			if (!$this->conectar(False)) {
-		        if($this->crear_bd()){
-		        	$this->conectar();
-		        	$this->crear_tabla_usuarios();
-		        	$this->crear_tabla();
-		        	$this->mensaje="";
-		        }
-		    }
-		    else if(!$this->verificar_tabla('usuarios')){
-		    	$this->crear_tabla_usuarios();
-		        $this->mensaje="";
-		    }
-		}
-
-		/**
 		 * Creacion de la sesion para el ingreso a la aplicacion
 		 * @param  [array] $datos_login [datos del usuario que ingresa]
 		 * @return [bool]
 		 */
 		function login($datos_login){
 			if (!$this->bd) return $this->error_conexion_mysql;
-
+			// Limpiar los datos ingresados de posibles caracteres especiales
 			$usuario = stripslashes($datos_login['nombre_usuario']);
 			$usuario = $this->bd->real_escape_string($usuario);
 			$clave = stripslashes($datos_login['clave_usuario']);
@@ -504,6 +512,7 @@
 			}
 			else{
 				$this->mensaje = "Datos incorrectos!";
+				return false;
 			}
 		}
 
@@ -514,11 +523,13 @@
 		 */
 		function auth(){
 			session_start();
+			// Si el usuario no ha iniciado sesion, redirige al login
 			if(!isset($_SESSION["nombre_usuario"])){
 				// Redirige al login
 				header("Location: login.php");
 			}
 			$now = time();
+			// Si el tiempo de sesion ha terminado, se cierra la sesion y redirige al login
 			if($now > $_SESSION['expire']) {
 				session_destroy();
 				// Redirige al login

@@ -46,13 +46,13 @@
                 <div class="form-group row">
                     <label for="nombre_usuario" class="col-sm-2 col-form-label">Usuario</label>
                     <div class="col-sm-8">
-                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required="required">
+                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required="required" autocomplete="off">
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="clave_usuario" class="col-sm-2 col-form-label">Contraseña</label>
                     <div class="col-sm-8">
-                        <input type="password" class="form-control" id="clave_usuario" name="clave_usuario" required="required">
+                        <input type="password" class="form-control" id="clave_usuario" name="clave_usuario" required="required" autocomplete="off">
                     </div>
                 </div>
                 <div class="form-group row">
